@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ecf39890d547ab4eaabd06300dfda67, type: 3}
+  m_Name: MultiShot
+  m_EditorClassIdentifier: 
+  _name: "\uBA40\uD2F0 \uC0F7"
+  _desc: "\uCD1D\uC54C\uC744 (1/2)\uAC1C \uCD94\uAC00\uB85C \uBC1C\uC0AC\uD55C\uB2E4."
+  _icon: {fileID: 21300000, guid: 7835bec40f86c2c4fb3f91a6eb3b7034, type: 3}
+  _increaseStat:
+  - _damage: 0
+    _attackSpeed: 0
+    _multiShot: 1
+  - _damage: 0
+    _attackSpeed: 0
+    _multiShot: 2

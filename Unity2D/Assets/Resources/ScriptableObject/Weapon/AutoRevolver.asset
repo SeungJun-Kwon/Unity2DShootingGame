@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d854769924808ad4ebcf69fb6fa7dada, type: 3}
+  m_Name: AutoRevolver
+  m_EditorClassIdentifier: 
+  _name: "\uC790\uB3D9 \uAD8C\uCD1D"
+  _type: 0
+  _desc: "\uB2E4\uB978 \uBB34\uAE30\uBCF4\uB2E4 \uB370\uBBF8\uC9C0\uB294 \uC57D\uD558\uC9C0\uB9CC
+    \uC5F0\uC0AC \uC18D\uB3C4\uAC00 \uBE60\uB974\uB2E4."
+  _icon: {fileID: 21300000, guid: 8e9ad52880ea5974086cc42c77a1abab, type: 3}
+  _bullet: {fileID: 21300000, guid: 9c4916216456fc442a9d89eeaa3e407b, type: 3}
+  _bulletAnim: {fileID: 0}
+  _shootEffect: {fileID: 979571032, guid: f29d2e1acc3b3e94dbd2b9dd63e13975, type: 3}
+  _shootEffectAnim: {fileID: 9100000, guid: d05b368bb5e5e1d44addc30d2fd2a3d6, type: 2}
+  _hitEffectMat: {fileID: 2100000, guid: 68334d56da6cd0044bdfb728a30c93d7, type: 2}
+  _damage: 5
+  _attackSpeed: 120

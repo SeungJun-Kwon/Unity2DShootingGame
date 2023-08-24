@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "951526593269",
+    "project_id": "unity2dgamedata",
+    "storage_bucket": "unity2dgamedata.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:951526593269:android:4eb504e4db539e3a79abbc",
+        "android_client_info": {
+          "package_name": "com.MyUnity.Unity2D"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "951526593269-uk0sldgqfj2i6sp9l6n44e2onuukg2bj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjiW_5R_A5dCPlSN96ku2-FT5VeuyggR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "951526593269-uk0sldgqfj2i6sp9l6n44e2onuukg2bj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "951526593269-g7shtrta0g87obbsknbea2ndpbuh7hkp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.MyUnity.Unity2D"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Ground
+  - Block
+  - Enemy
+  - CMVCamFollow
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - Unit
+  - Water
+  - UI
+  - Ground
+  - Player
+  - Enemy
+  - Item
+  - Block
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 40142817
+    locked: 0
+  - name: Deco_Back
+    uniqueID: 1591081883
+    locked: 0
+  - name: Ground
+    uniqueID: 2288561649
+    locked: 0
+  - name: Deco_Front
+    uniqueID: 2380047659
+    locked: 0
+  - name: Effect
+    uniqueID: 2862132161
+    locked: 0
+  - name: Bullet
+    uniqueID: 2920433689
+    locked: 0
+  - name: Unit
+    uniqueID: 3397253623
+    locked: 0
+  - name: UnitEffect
+    uniqueID: 1761840915
+    locked: 0
+  - name: Equipment
+    uniqueID: 1702799385
+    locked: 0
+  - name: UI
+    uniqueID: 372077815
+    locked: 0

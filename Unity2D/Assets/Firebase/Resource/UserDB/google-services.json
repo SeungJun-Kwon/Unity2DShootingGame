@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "900363437358",
+    "firebase_url": "https://userdb-6f753-default-rtdb.firebaseio.com",
+    "project_id": "userdb-6f753",
+    "storage_bucket": "userdb-6f753.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900363437358:android:49a3c3997a1a548b0e26bf",
+        "android_client_info": {
+          "package_name": "com.MyUnity.Unity2D"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "900363437358-31v7q2e8uj3gpujek33pkchtkl194lpo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAa3mYWUfzKjWuKwnylAAt0SKfRwx-WJPQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "900363437358-31v7q2e8uj3gpujek33pkchtkl194lpo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

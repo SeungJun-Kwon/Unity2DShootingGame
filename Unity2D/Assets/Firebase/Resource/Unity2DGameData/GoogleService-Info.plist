@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>951526593269-g7shtrta0g87obbsknbea2ndpbuh7hkp.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.951526593269-g7shtrta0g87obbsknbea2ndpbuh7hkp</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAqYis6RreYsSyld_92PVK2A2sPmYLY7yg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>951526593269</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.MyUnity.Unity2D</string>
+	<key>PROJECT_ID</key>
+	<string>unity2dgamedata</string>
+	<key>STORAGE_BUCKET</key>
+	<string>unity2dgamedata.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:951526593269:ios:d45601e5d7bcc21079abbc</string>
+</dict>
+</plist>
