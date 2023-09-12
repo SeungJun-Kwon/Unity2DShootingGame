@@ -11,8 +11,6 @@ public class GameUIController : MonoBehaviour
 
     [SerializeField] AbilitySelectManager _abilitySelectManager;
 
-    [SerializeField] TMP_Text _messageText;
-
     [Header("Player UI")]
     public GameObject _playerUI;
 
@@ -31,6 +29,13 @@ public class GameUIController : MonoBehaviour
     [Header("Chatting")]
     [SerializeField] TMP_InputField _chatInput;
 
+    [Header("Message")]
+    public TMP_Text _messageText;
+    Animator _animMessage;
+
+    [Header("GameFinishUI")]
+    public GameFinishUIController _gameFinishUI;
+
     [HideInInspector] public PlayerController _playerController = null;
 
     Canvas _canvas;
@@ -47,6 +52,8 @@ public class GameUIController : MonoBehaviour
         if (_timerFill == null)
             _timerImage.transform.GetChild(0).gameObject.TryGetComponent(out _timerFill);
 
+        _messageText.gameObject.TryGetComponent(out _animMessage);
+        _messageText.gameObject.SetActive(false);
         _timerImage.gameObject.SetActive(false);
         _chatInput.gameObject.SetActive(false);
 
@@ -108,11 +115,11 @@ public class GameUIController : MonoBehaviour
         }
     }
     
-
-    public void ShowMessage(string text, float size = 100)
+    public void EnableMessage(string text)
     {
-        _messageText.enabled = true;
+        _messageText.gameObject.SetActive(true);
         _messageText.text = text;
-        _messageText.fontSize = size;
     }
+
+    public void DisableMessage() => _animMessage.SetTrigger("Disable");
 }

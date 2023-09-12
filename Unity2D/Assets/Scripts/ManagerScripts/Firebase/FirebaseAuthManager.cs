@@ -65,9 +65,24 @@ public class FirebaseAuthManager
     {
         try
         {
-            var result = await _auth.CreateUserWithEmailAndPasswordAsync(email, pw);
-            FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
-            return true;
+            var createResult = await FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
+
+            switch(createResult)
+            {
+                case 0:
+                    return false;
+                case 1:
+                    Debug.Log("이메일");
+                    return false;
+                case 2:
+                    Debug.Log("닉네임");
+                    return false;
+                case 3:
+                    var result = await _auth.CreateUserWithEmailAndPasswordAsync(email, pw);
+                    return true;
+            }
+
+            return false;
         }
         catch(FirestoreException e)
         {
@@ -108,7 +123,7 @@ public class FirebaseAuthManager
         {
             var result = await _auth.SignInWithEmailAndPasswordAsync(email, pw);
             _user = result;
-            var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfo(_user.Email);
+            var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfoByEmail(_user.Email);
             if (userInfo != null)
                 PhotonNetwork.LocalPlayer.NickName = userInfo.Name;
             else

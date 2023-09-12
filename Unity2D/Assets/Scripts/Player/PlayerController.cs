@@ -45,7 +45,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [HideInInspector] public CapsuleCollider2D _collider;
     [HideInInspector] public Animator _animator;
     [HideInInspector] public SpriteRenderer _spriteRenderer;
-    [HideInInspector] public UserInfo _info;
     [HideInInspector] public PlayerManager _playerManager;
 
     [Header("Effect")]
@@ -134,8 +133,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         if (photonView.IsMine)
         {
-            //photonView.RPC("LoadUserData", RpcTarget.AllBuffered);
-            //_playerManager.photonView.RPC("LoadUserData", RpcTarget.AllBuffered, FirebaseAuthManager.Instance._user.Email);
+            _playerManager.photonView.RPC(nameof(_playerManager.LoadUserData), RpcTarget.AllBuffered, FirebaseAuthManager.Instance._user.Email);
             gameObject.layer = LayerMask.NameToLayer("Player");
             GameUIController.Instance._playerController = this;
             _playerUIController._itsMe.gameObject.SetActive(true);
@@ -153,7 +151,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 _iStateArr[i].OnUpdate();
 
             if (Input.GetKeyDown(KeyCode.Tab))
-                photonView.RPC("Hit", RpcTarget.All, 50);
+                photonView.RPC("Hit", RpcTarget.All, 100);
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -204,9 +202,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         //cm.Follow = transform;
         //cm.LookAt = transform;
     }
-
-    [PunRPC]
-    public async void LoadUserData() => _info = await FirebaseFirestoreManager.Instance.LoadUserInfo(FirebaseAuthManager.Instance._user.Email);
 
     [PunRPC]
     public void SetTransformName(string name) => transform.name = name;
@@ -484,7 +479,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         yield return new WaitForSeconds(0.5f);
 
         if(photonView.IsMine)
-            GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.RoundFinish), RpcTarget.All);
+            GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.RoundFinishEffectCorRPC), RpcTarget.All);
     }
 
     public GameObject Instantiate(GameObject go, Transform parent = null)

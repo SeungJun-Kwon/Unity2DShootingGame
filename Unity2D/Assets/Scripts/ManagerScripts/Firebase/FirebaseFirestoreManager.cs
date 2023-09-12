@@ -34,14 +34,19 @@ public class FirebaseFirestoreManager
     }
 
     #region User
-    public void CreateUser(string userEmail, UserInfo userInfo)
+    // Return 값에 따른 상태
+    // 0 : 오류로 인한 실패
+    // 1 : 동일한 이메일 존재
+    // 2 : 동일한 닉네임 존재
+    // 3 : 성공
+    public Task<int> CreateUser(string userEmail, UserInfo userInfo)
     {
         _userStore.Collection(_userInfo).Document(userEmail).GetSnapshotAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
                 Debug.LogError("Failed to read data: " + task.Exception);
-                return;
+                Task.FromResult(0);
             }
 
             DocumentSnapshot snapshot = task.Result;
@@ -50,16 +55,42 @@ public class FirebaseFirestoreManager
             if (snapshot.Exists)
             {
                 Debug.LogWarning("UserInfo ID already exists.");
+                Task.FromResult(1);
             }
             // 해당 ID를 사용하는 사용자가 존재하지 않는 경우
             else
             {
-                // 새로운 사용자 데이터 생성 및 저장
-                _userStore.Collection(_userInfo).Document(userEmail).SetAsync(userInfo);
+                _userStore.Collection(_userInfo).WhereEqualTo("name", userInfo.Name).GetSnapshotAsync().ContinueWith(task =>
+                {
+                    if(task.IsFaulted)
+                    {
+                        Debug.LogError("Failed to read data: " + task.Exception);
+                        Task.FromResult(0);
+                    }
 
-                Debug.Log("New user added.");
+                    QuerySnapshot snapshot = task.Result;
+
+                    // 해당 닉네임을 사용하는 사용자가 이미 존재하는 경우
+                    if(snapshot.Count > 0)
+                    {
+                        Debug.LogWarning("UserInfo Name already exists.");
+                        Task.FromResult(2);
+                    }
+                    // 해당 닉네임을 사용하는 사용자가 이미 존재하지 않는 경우
+                    else
+                    {
+                        // 새로운 사용자 데이터 생성 및 저장
+                        _userStore.Collection(_userInfo).Document(userEmail).SetAsync(userInfo);
+                        Task.FromResult(3);
+                        Debug.Log("New user added.");
+                    }
+
+                    return Task.CompletedTask;
+                });
             }
         });
+
+        return Task.FromResult(3);
     }
 
     public void UpdateUserInfo(FirebaseUser user, UserInfo userInfo)
@@ -92,7 +123,7 @@ public class FirebaseFirestoreManager
         });
     }
 
-    public async Task<UserInfo> LoadUserInfo(string email)
+    public async Task<UserInfo> LoadUserInfoByEmail(string email)
     {
         try
         {
@@ -112,5 +143,35 @@ public class FirebaseFirestoreManager
             return null;
         }
     }
+
+    public async Task<UserInfo> LoadUserInfoByNickname(string nickname)
+    {
+        try
+        {
+            var query = await _userStore.Collection(_userInfo).WhereEqualTo("name", nickname).GetSnapshotAsync();
+
+            if (query.Count > 0)
+            {
+                foreach(var result in query)
+                {
+                    UserInfo userInfo = result.ConvertTo<UserInfo>();
+
+                    return userInfo;
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (FirestoreException e)
+        {
+            Debug.Log($"유저 데이터 로드 실패 : {e.Message}");
+            return null;
+        }
+    }
+
     #endregion
 }

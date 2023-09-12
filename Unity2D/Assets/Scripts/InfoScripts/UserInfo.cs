@@ -14,8 +14,11 @@ public class UserInfo
     [FirestoreProperty("name")]
     public string Name { get; set; }
 
-    [FirestoreProperty("lv")]
-    public int Lv { get; set; }
+    [FirestoreProperty("profile")]
+    public string Profile { get; set; }
+
+    [FirestoreProperty("intro")]
+    public string Intro { get; set; }
 
     [FirestoreProperty("win")]
     public int Win { get; set; }
@@ -26,7 +29,8 @@ public class UserInfo
     public UserInfo()
     {
         Name = "";
-        Lv = 0;
+        Profile = "";
+        Intro = "";
         Win = 0;
         Lose = 0;
     }
@@ -34,35 +38,11 @@ public class UserInfo
     public UserInfo(string name) : this()
     {
         Name = name;
-    }
-
-    public UserInfo(string name, int win, int lose) : this(name)
-    {
-        Win = win;
-        Lose = lose;
-    }
-
-    public void ModifyValue(string fieldName, float value)
-    {
-        var field = this.GetType().GetField(fieldName);
-        if (field != null)
-        {
-            Type fieldType = field.FieldType;
-            if (fieldType == typeof(float))
-            {
-                float currentValue = (float)field.GetValue(this);
-                field.SetValue(this, currentValue + value);
-            }
-            else if (fieldType == typeof(int))
-            {
-                int currentValue = (int)field.GetValue(this);
-                field.SetValue(this, currentValue + (int)value);
-            }
-        }
+        Profile = "Default.png";
     }
 
     public override string ToString()
     {
-        return $"Name: {Name}, Lv: {Lv}, Win: {Win}, Lose: {Lose}";
+        return $"Name: {Name}, Lv: {Profile}, Win: {Win}, Lose: {Lose}\nIntro: {Intro}";
     }
 }

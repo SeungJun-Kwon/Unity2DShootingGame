@@ -24,8 +24,6 @@ public class LobbyUIManager : MonoBehaviour
     public TMP_InputField _roomPwInput;
     public Image _mapImage;
 
-    public TMP_InputField _nickInput;
-
     RoomInfo _curRoom;
     public RoomInfo CurRoom
     {
@@ -159,13 +157,9 @@ public class LobbyUIManager : MonoBehaviour
         }
     }
 
-    public void SetNickName()
+    public void OpenUserInfo()
     {
-        string name = _nickInput.text;
-
-        if (name.Replace(" ", "") == "" || name.Length > 10)
-            return;
-
-        PhotonNetwork.LocalPlayer.NickName = name;
+        UserInfoUIManager.Instance.gameObject.SetActive(true);
+        UserInfoUIManager.Instance.LoadUserInfo(PhotonNetwork.LocalPlayer.NickName);
     }
 }

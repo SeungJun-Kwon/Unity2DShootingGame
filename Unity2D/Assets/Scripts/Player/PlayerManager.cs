@@ -71,10 +71,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public async void LoadUserData(string email)
     {
-        _info = await FirebaseFirestoreManager.Instance.LoadUserInfo(email);
+        _info = await FirebaseFirestoreManager.Instance.LoadUserInfoByEmail(email);
         print(_info.ToString());
-
-        _moveSpeed = 100f;
     }
 
     void Init()

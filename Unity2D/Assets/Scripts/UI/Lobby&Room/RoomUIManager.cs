@@ -336,4 +336,27 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void LeaveRoom() => PhotonNetwork.LeaveRoom();
+
+    public async void OpenUserInfo(int playerNum)
+    {
+        string nickName;
+
+        if (playerNum == 1)
+            nickName = _player1Name.text;
+        else
+            nickName = _player2Name.text;
+
+        nickName = nickName.Trim();
+
+        if (nickName == null || nickName == "")
+            return;
+
+        UserInfo info = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(nickName);
+
+        if (info == null)
+            return;
+
+        UserInfoUIManager.Instance.gameObject.SetActive(true);
+        UserInfoUIManager.Instance.LoadUserInfo(nickName, PhotonNetwork.LocalPlayer.NickName == nickName ? true : false);
+    }
 }

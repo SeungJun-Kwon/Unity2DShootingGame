@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _players: []
+  _me: {fileID: 0}
+  _other: {fileID: 0}
   _cmvcam: {fileID: 0}
   _player1StartPos: {fileID: 0}
   _player2StartPos: {fileID: 0}

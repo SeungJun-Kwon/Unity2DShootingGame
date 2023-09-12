@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+enum GameState { WIN, LOSE, DRAW }
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance;
 
     public List<PlayerController> _players = new List<PlayerController>();
+    public PlayerController _me, _other;
 
     Dictionary<PlayerController, string> _playerWeaponDic = new Dictionary<PlayerController, string>();
     Dictionary<PlayerController, int> _playerPointDic = new Dictionary<PlayerController, int>();
@@ -33,32 +35,68 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             _gameRound = value;
 
-            foreach (var p in _players)
+            _me.Available = false;
+            _me.photonView.RPC(nameof(_me.SetPlayerColor), RpcTarget.All, 1f, 1f, 1f, 0f);
+
+            //_other.Available = false;
+            //_other.photonView.RPC(nameof(_other.SetPlayerColor), RpcTarget.All, 1f, 1f, 1f, 0f);
+
+            switch (_curState)
             {
-                p.Available = false;
-
-                if (p.FindState(State.DIE))
-                {
-                    if (p.photonView.Owner.NickName == PhotonNetwork.LocalPlayer.NickName)
-                        SelectUpgrade(p._playerManager);
-                }
-                else
-                {
-                    if ((bool)p._playerManager._player.CustomProperties["Player1"])
-                        GameUIController.Instance._player1Point[_playerPointDic[p]].color = Color.red;
+                case GameState.WIN:
+                    if ((bool)_me._playerManager._player.CustomProperties["Player1"])
+                        GameUIController.Instance._player1Point[_playerPointDic[_me]].color = Color.red;
                     else
-                        GameUIController.Instance._player2Point[_playerPointDic[p]].color = Color.red;
+                        GameUIController.Instance._player2Point[_playerPointDic[_me]].color = Color.red;
 
-                    _playerPointDic[p]++;
+                    _playerPointDic[_me]++;
 
-                    p.photonView.RPC(nameof(p.SetPlayerColor), RpcTarget.All, 1f, 1f, 1f, 0f);
-
-                    if (_playerPointDic[p] == _gamePoint && PhotonNetwork.IsMasterClient)
+                    if (_playerPointDic[_me] == _gamePoint && PhotonNetwork.IsMasterClient)
                     {
                         photonView.RPC(nameof(GameFinish), RpcTarget.All);
                         return;
                     }
-                }
+                    break;
+                case GameState.LOSE:
+                    //if ((bool)_other._playerManager._player.CustomProperties["Player1"])
+                    //    GameUIController.Instance._player1Point[_playerPointDic[_other]].color = Color.red;
+                    //else
+                    //    GameUIController.Instance._player2Point[_playerPointDic[_other]].color = Color.red;
+
+                    //_playerPointDic[_other]++;
+
+                    //if (_playerPointDic[_other] == _gamePoint && PhotonNetwork.IsMasterClient)
+                    //{
+                    //    photonView.RPC(nameof(GameFinish), RpcTarget.All);
+                    //    return;
+                    //}
+
+                    SelectUpgrade(_me._playerManager);
+                    break;
+                case GameState.DRAW:
+                    if ((bool)_me._playerManager._player.CustomProperties["Player1"])
+                    {
+                        GameUIController.Instance._player1Point[_playerPointDic[_me]].color = Color.red;
+                        //GameUIController.Instance._player2Point[_playerPointDic[_other]].color = Color.red;
+                    }
+                    else
+                    {
+                        //GameUIController.Instance._player1Point[_playerPointDic[_other]].color = Color.red;
+                        GameUIController.Instance._player2Point[_playerPointDic[_me]].color = Color.red;
+                    }
+
+                    _playerPointDic[_me]++;
+                    //_playerPointDic[_other]++;
+
+                    //if ((_playerPointDic[_me] == _gamePoint || _playerPointDic[_other] == _gamePoint) && PhotonNetwork.IsMasterClient)
+                    if (_playerPointDic[_me] == _gamePoint && PhotonNetwork.IsMasterClient)
+                    {
+                        photonView.RPC(nameof(GameFinish), RpcTarget.All);
+                        return;
+                    }
+
+                    SelectUpgrade(_me._playerManager);
+                    break;
             }
         }
     }
@@ -69,6 +107,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] Transform _player1StartPos, _player2StartPos;
 
     MapData _curMap;
+    GameState _curState;
 
     float _timer = 10f;
 
@@ -147,8 +186,18 @@ public class GameManager : MonoBehaviourPunCallbacks
             playerController.gameObject.SetActive(false);
         }
 
-        if(_players.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+        if (_players.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+        {
+            foreach(var p in _players)
+            {
+                if (p.photonView.Owner.NickName == PhotonNetwork.LocalPlayer.NickName)
+                    _me = p;
+                else
+                    _other = p;
+            }
+
             photonView.RPC(nameof(SelectWeapon), RpcTarget.All);
+        }
     }
 
     [PunRPC]
@@ -237,6 +286,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RoundStart()
     {
+        GameUIController.Instance._messageText.gameObject.SetActive(false);
+
         _cmvcam.m_Lens.OrthographicSize = _curMap._lensOrthoSize;
 
         foreach (var p in _players)
@@ -256,10 +307,72 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void RoundFinish() => GameRound += 1;
 
     [PunRPC]
+    public void RoundFinishEffectCorRPC() => StartCoroutine(RoundFinishEffectCor());
+
+    IEnumerator RoundFinishEffectCor()
+    {
+        int hpZero = 0;
+        int hpNotZero = 0;
+
+        for(int i = 0; i < _players.Count; i++)
+        {
+            if (_players[i]._playerManager.CurHp > 0)
+                hpNotZero++;
+            else
+                hpZero++;
+        }
+
+        // 둘 다 HP가 0이거나 둘 다 HP가 0 초과일 때 : 비겼을 때
+        if (hpZero >= _players.Count || hpNotZero >= _players.Count)
+        {
+            GameUIController.Instance.EnableMessage("DRAW");
+            _curState = GameState.DRAW;
+        }
+        // 승자가 있을 때
+        else
+        {
+            // 승자가 로컬 플레이어인지 아닌지
+            if (_me._playerManager.CurHp > 0)
+            {
+                GameUIController.Instance.EnableMessage("WIN!");
+                _curState = GameState.WIN;
+            }
+            else
+            {
+                GameUIController.Instance.EnableMessage("LOSE...");
+                _curState = GameState.LOSE;
+            }
+        }
+
+        yield return new WaitForSeconds(1.5f);
+
+        GameUIController.Instance.DisableMessage();
+
+        yield return new WaitForSeconds(2f);
+
+        if (PhotonNetwork.IsMasterClient)
+            photonView.RPC(nameof(RoundFinish), RpcTarget.All);
+    }
+
+    [PunRPC]
     public void GameFinish()
     {
-        if(PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InRoom)
-            PhotonNetwork.LeaveRoom();
+        GameUIController.Instance._gameFinishUI.gameObject.SetActive(true);
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            string winnerName = "", loserName = "";
+
+            foreach (var p in _players)
+            {
+                if (_playerPointDic[p] == _gamePoint)
+                    winnerName = p.photonView.Owner.NickName;
+                else
+                    loserName = p.photonView.Owner.NickName;
+            }
+
+            GameUIController.Instance._gameFinishUI.EnableGameFinishUI(winnerName, loserName);
+        }
     }
 
     [PunRPC]
