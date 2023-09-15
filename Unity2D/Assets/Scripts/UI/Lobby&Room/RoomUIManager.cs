@@ -296,14 +296,14 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
-        //if (_player1 == null || _player2 == null)
-        //    return;
+        if (_player1 == null || _player2 == null)
+            return;
 
-        //bool player1IsReady = (bool)_player1.CustomProperties["IsReady"];
-        //bool player2IsReady = (bool)_player2.CustomProperties["IsReady"];
+        bool player1IsReady = (bool)_player1.CustomProperties["IsReady"];
+        bool player2IsReady = (bool)_player2.CustomProperties["IsReady"];
 
-        //if (!player1IsReady || !player2IsReady)
-        //    return;
+        if (!player1IsReady || !player2IsReady)
+            return;
 
         photonView.RPC("SetButtonInteractable", RpcTarget.All, false);
         PhotonNetwork.CurrentRoom.IsOpen = false;

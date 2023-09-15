@@ -16,19 +16,20 @@ public class PlayerJump : IState, IPunObservable
     {
         _playerController.Jump();
         _playerController.PlayAnimation(State.JUMP);
-
-        if(!_playerController.IsGrounded)
-            _playerController._playerManager._doubleJump = true;
+        _playerController._playerManager._jumpLeft--;
     }
 
     public void OnExit()
     {
-        _playerController.InstantiateObject("Prefabs/01_Test/LandingEffect", _playerController.transform.position, Quaternion.identity);
+        _playerController.InstantiateObject("Prefabs/Effects/LandingEffect", _playerController.transform.position, Quaternion.identity);
+        _playerController._playerManager._jumpLeft = _playerController._playerManager.MaxJump;
+        _playerController.PlayAnimation(State.JUMP);
     }
 
     public void OnFixedUpdate()
     {
-
+        if (_playerController.IsGrounded())
+            _playerController.photonView.RPC(nameof(_playerController.ExitState), RpcTarget.All, State.JUMP);
     }
 
     public void OnUpdate()

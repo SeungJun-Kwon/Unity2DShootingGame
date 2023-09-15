@@ -18,6 +18,8 @@ public class PlayerDie : IState
 
         if (_playerController.photonView.IsMine)
             _playerController.photonView.RPC(nameof(_playerController.DyingEffectCorRPC), RpcTarget.All);
+
+        GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.StopTimer), RpcTarget.MasterClient);
     }
 
     public void OnExit()

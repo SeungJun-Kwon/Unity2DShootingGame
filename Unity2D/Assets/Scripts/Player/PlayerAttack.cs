@@ -54,7 +54,7 @@ public class PlayerAttack : IState, IPunObservable
                 else
                     multiPos = new Vector2(_bulletPos.x, _bulletPos.y + (_spriteSize.y * 1.5f * ((i / 2) + i % 2)));
 
-                PhotonNetwork.Instantiate("Prefabs/01_Test/Bullet", multiPos, Quaternion.identity).TryGetComponent(out _bulletGO);
+                PhotonNetwork.Instantiate("Prefabs/Players/Bullet", multiPos, Quaternion.identity).TryGetComponent(out _bulletGO);
                 _bulletGO.photonView.RPC("SetWeapon", RpcTarget.All, _playerController._playerManager.CurWeapon._name, _dir);
                 _bulletGO.Shoot();
                 _bulletGO._upgradeDamage = _playerController._playerManager._curStat._damage;
@@ -62,7 +62,7 @@ public class PlayerAttack : IState, IPunObservable
 
             if (_playerController._playerManager.CurWeapon._shootEffect != null || _playerController._playerManager.CurWeapon._shootEffectAnim != null)
             {
-                PhotonNetwork.Instantiate("Prefabs/01_Test/ShootEffect", _bulletPos, Quaternion.identity).TryGetComponent(out ShootEffect shootEffect);
+                PhotonNetwork.Instantiate("Prefabs/Effects/ShootEffect", _bulletPos, Quaternion.identity).TryGetComponent(out ShootEffect shootEffect);
                 shootEffect.photonView.RPC("SetEffect", RpcTarget.All, _playerController._playerManager.CurWeapon._name, _dir == Vector2.right ? false : true);
             }
 

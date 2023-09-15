@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:900363437358:android:49a3c3997a1a548b0e26bf",
+        "mobilesdk_app_id": "1:900363437358:android:a0629bacaaeeb6720e26bf",
         "android_client_info": {
-          "package_name": "com.MyUnity.Unity2D"
+          "package_name": "com.DAchoMI.Unity2DShootingGame"
         }
       },
       "oauth_client": [

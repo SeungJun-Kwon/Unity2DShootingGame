@@ -35,16 +35,6 @@ public class SignInSystem : MonoBehaviour
         FirebaseFirestoreManager.Instance.Init();
     }
 
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Tab))
-        {
-            _idInput.text = "tyrnsorl123@gmail.com";
-            _pwInput.text = "qnfiqnfi12";
-            SignIn();
-        }
-    }
-
     bool Check()
     {
         _id = _idInput.text.Trim();

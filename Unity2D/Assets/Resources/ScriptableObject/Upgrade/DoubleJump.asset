@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DoubleJump
   m_EditorClassIdentifier: 
   _name: "\uB354\uBE14 \uC810\uD504"
-  _desc: "\uD55C\uBC88 \uB354 \uC810\uD504\uB97C \uD560 \uC218 \uC788\uAC8C \uB41C\uB2E4."
+  _desc: "\uD55C \uBC88 \uB354 \uC810\uD504\uB97C \uD560 \uC218 \uC788\uAC8C \uB41C\uB2E4."
   _icon: {fileID: 5907920678353447086, guid: 10f3cacccb0c4c547be76836eba20664, type: 3}
   _increaseStat:
   - _damage: 0

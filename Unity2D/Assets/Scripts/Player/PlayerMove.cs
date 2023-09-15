@@ -33,8 +33,6 @@ public class PlayerMove : IState
             {
                 _playerController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.MOVE);
                 _playerController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.IDLE);
-                //_playerController.ExitState(State.MOVE);
-                //_playerController.EnterState(State.IDLE);
             }
         }
     }

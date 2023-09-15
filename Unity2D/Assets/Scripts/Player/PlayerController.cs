@@ -22,25 +22,6 @@ public interface IState
 [RequireComponent(typeof(PlayerManager))]
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
-    bool _isGrounded = true;
-    public bool IsGrounded
-    {
-        get { return _isGrounded; }
-        set
-        {
-            _isGrounded = value;
-            _animator.SetBool("IsGrounded", value);
-            if (_isGrounded)
-            {
-                _playerManager._doubleJump = false;
-                if (FindState(State.JUMP))
-                    photonView.RPC(nameof(ExitState), RpcTarget.AllBuffered, State.JUMP);
-            }
-            else
-                photonView.RPC(nameof(EnterState), RpcTarget.AllBuffered, State.JUMP);
-        }
-    }
-
     [HideInInspector] public Rigidbody2D _rigidbody;
     [HideInInspector] public CapsuleCollider2D _collider;
     [HideInInspector] public Animator _animator;
@@ -55,15 +36,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     public Transform _gunPart;
     public SpriteRenderer _gunSprite;
 
-    [Header("Unit UI")]
-    public GameObject _unitGameUI;
-    public TMP_Text _nameText;
-    public Image _hpBar;
+    [Space(5)]
     [SerializeField] PlayerUIController _playerUIController;
 
     [Header("Value Setting")]
-    public float _moveSpeed = 3f;
-    public float _maxSpeed = 10f;
+    public float _moveSpeed = 6f;
     public float _jumpForce = 15f;
 
     protected Dictionary<State, IState> _stateDic = new Dictionary<State, IState>();
@@ -126,11 +103,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Start()
     {
-        IsGrounded = true;
-
-        //_nameText.text = _photonView.IsMine ? PhotonNetwork.NickName : _photonView.Owner.NickName;
-        //_nameText.color = _photonView.IsMine ? Color.green : Color.red;
-
         if (photonView.IsMine)
         {
             _playerManager.photonView.RPC(nameof(_playerManager.LoadUserData), RpcTarget.AllBuffered, FirebaseAuthManager.Instance._user.Email);
@@ -150,16 +122,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             for (int i = 0; i < _iStateArr.Count; i++)
                 _iStateArr[i].OnUpdate();
 
-            if (Input.GetKeyDown(KeyCode.Tab))
-                photonView.RPC("Hit", RpcTarget.All, 100);
-
             if (Input.GetButtonDown("Jump"))
             {
                 // 1. 땅에 있는 상태
                 // 2. 공중이라면 더블 점프 업그레이드가 존재하며 더블 점프를 사용하지 않았을 때
-                if (IsGrounded)
+                if (IsGrounded())
                     photonView.RPC(nameof(EnterState), RpcTarget.All, State.JUMP);
-                else if (!IsGrounded && !_playerManager._doubleJump && _playerManager._curStat._doubleJump)
+                else if (!IsGrounded() && _playerManager._jumpLeft > 0)
                     photonView.RPC(nameof(ForceEnterState), RpcTarget.All, State.JUMP);
             }
 
@@ -177,11 +146,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         {
             for (int i = 0; i < _iStateArr.Count; i++)
                 _iStateArr[i].OnFixedUpdate();
-
-            if (_rigidbody.velocity.y < -0.01f || _rigidbody.velocity.y > 0.01f)
-                IsGrounded = false;
-            else if (_rigidbody.velocity.y >= -0.01f && _rigidbody.velocity.y <= 0.01f)
-                IsGrounded = true;
         }
         else
         {
@@ -194,13 +158,15 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     public void Init()
     {
-        //GameObject unitGameUI = Resources.Load("Prefabs/UI/UnitGameUI") as GameObject;
-        //_unitGameUI = Instantiate(unitGameUI, transform);
-        //_unitGameUI.transform.Find("Name").gameObject.TryGetComponent(out _nameText);
-        //_unitGameUI.transform.Find("HpBar").Find("Fill").gameObject.TryGetComponent(out _hpBar);        
-        //GameObject.Find("CMvcam").TryGetComponent(out CinemachineVirtualCamera cm);
-        //cm.Follow = transform;
-        //cm.LookAt = transform;
+        _playerManager.Init();
+
+        Available = true;
+        photonView.RPC(nameof(ExitState), RpcTarget.All, State.DIE);
+        photonView.RPC(nameof(EnterState), RpcTarget.All, State.IDLE);
+        if ((bool)_playerManager._player.CustomProperties["Player1"])
+            transform.position = GameManager.Instance._player1StartPos.position;
+        else
+            transform.position = GameManager.Instance._player2StartPos.position;
     }
 
     [PunRPC]
@@ -255,11 +221,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         // 버퍼에 너무 많이 저장되면, 네트워크가 약한 클라이언트는 끊어질 수 있다고 한다.
         photonView.RPC("MoveXRPC", RpcTarget.AllBuffered, moveX);
 
-        _rigidbody.AddForce(Vector2.right * moveX * _moveSpeed * (_playerManager._moveSpeed / 100f), ForceMode2D.Impulse);
-        if (_rigidbody.velocity.x > _maxSpeed)
-            _rigidbody.velocity = new Vector2(_maxSpeed, _rigidbody.velocity.y);
-        else if (_rigidbody.velocity.x < -_maxSpeed)
-            _rigidbody.velocity = new Vector2(-_maxSpeed, _rigidbody.velocity.y);
+        _rigidbody.velocity = new Vector2(moveX * _moveSpeed * (_playerManager._moveSpeed / 100f), _rigidbody.velocity.y);
     }
 
     [PunRPC]
@@ -294,7 +256,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    public void Jump() => _rigidbody.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
+    public void Jump() => _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce);
+
+    public bool IsGrounded()
+    {
+        return (_rigidbody.velocity.y <= 0.001f && _rigidbody.velocity.y >= -0.001f) && 
+            Physics2D.OverlapBox(new Vector2(transform.position.x, transform.position.y - _spriteRenderer.bounds.size.y / 2), new Vector2(_spriteRenderer.bounds.size.x, 0.1f), 0f, LayerMask.GetMask("Ground"));
+    }
 
     public virtual void Attack()
     {
@@ -317,10 +285,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 _animator.SetTrigger("Attack");
                 break;
             case State.JUMP:
-                _animator.SetTrigger("Jump");
+                _animator.SetBool("IsGrounded", IsGrounded());
                 break;
             case State.DIE:
                 _animator.SetTrigger("Die");
+                _animator.SetBool("IsGrounded", true);
+                _animator.SetBool("IsWalking", false);
                 break;
         }
     }
@@ -381,15 +351,20 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void Hit(int damage)
     {
-        if (FindState(State.HIT) || !Available)
+        if (!Available)
             return;
 
         _playerManager.CurHp -= damage;
 
         if (_playerManager.CurHp > 0)
-            photonView.RPC(nameof(EnterState), RpcTarget.All, State.HIT);
+        {
+            if (FindState(State.HIT))
+                photonView.RPC(nameof(ExitState), RpcTarget.All, State.HIT);
 
-        if (_playerManager.CurHp <= 0)
+            photonView.RPC(nameof(EnterState), RpcTarget.All, State.HIT);
+        }
+
+        if (_playerManager.CurHp <= 0 && !FindState(State.DIE))
             Die();
     }
 
@@ -401,7 +376,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         _playerManager.CurHp -= damage;
 
-        PhotonNetwork.Instantiate("Prefabs/01_Test/HitEffect", hitPos, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
+        PhotonNetwork.Instantiate("Prefabs/Effects/HitEffect", hitPos, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
         hitEffect.photonView.RPC(nameof(hitEffect.SetWeapon), RpcTarget.All, _playerManager._weaponName);
 
         if (_playerManager.CurHp > 0)
@@ -478,13 +453,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         yield return new WaitForSeconds(0.5f);
 
-        if(photonView.IsMine)
+        if(PhotonNetwork.IsMasterClient)
             GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.RoundFinishEffectCorRPC), RpcTarget.All);
     }
 
     public GameObject Instantiate(GameObject go, Transform parent = null)
     {
-        GameObject result = null;
+        GameObject result;
 
         if (parent == null)
             result = UnityEngine.Object.Instantiate(go);

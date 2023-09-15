@@ -776,7 +776,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6281599776387505251, guid: 84faf1385d3909c43aad94c0d420a322, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -200
+      value: -200.00003
       objectReference: {fileID: 0}
     - target: {fileID: 6281599776387505261, guid: 84faf1385d3909c43aad94c0d420a322, type: 3}
       propertyPath: sceneViewId
@@ -880,11 +880,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6281599777289553594, guid: 84faf1385d3909c43aad94c0d420a322, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -300
+      value: -300.00003
       objectReference: {fileID: 0}
     - target: {fileID: 6281599777624034603, guid: 84faf1385d3909c43aad94c0d420a322, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -200
+      value: -200.00003
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 84faf1385d3909c43aad94c0d420a322, type: 3}
@@ -921,7 +921,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7005611755360872066, guid: 5232a79835384ae46b4a3c97835623d7, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -250
+      value: -250.00003
       objectReference: {fileID: 0}
     - target: {fileID: 7005611756069532541, guid: 5232a79835384ae46b4a3c97835623d7, type: 3}
       propertyPath: m_Pivot.x
@@ -1090,11 +1090,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7956082764404830134, guid: 0c22963091bc6c84c96c767d90dce562, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 500
+      value: 600
       objectReference: {fileID: 0}
     - target: {fileID: 7956082764404830134, guid: 0c22963091bc6c84c96c767d90dce562, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 700
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 7956082764404830134, guid: 0c22963091bc6c84c96c767d90dce562, type: 3}
       propertyPath: m_LocalPosition.x

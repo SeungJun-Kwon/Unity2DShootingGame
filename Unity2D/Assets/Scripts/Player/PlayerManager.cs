@@ -40,7 +40,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
 
     public int _hp, _damage;
     public float _moveSpeed, _attackSpeed;
-    public bool _doubleJump;
+
+    int _maxJump = 1;
+    public int MaxJump
+    {
+        get { return _maxJump + _curStat._doubleJump; }
+        set { _maxJump = value + _curStat._doubleJump; }
+    }
+
+    public int _jumpLeft;
 
     private float _curHp;
     public float CurHp
@@ -63,27 +71,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    private void Awake()
-    {
-        Init();
-    }
-
     [PunRPC]
     public async void LoadUserData(string email)
     {
         _info = await FirebaseFirestoreManager.Instance.LoadUserInfoByEmail(email);
-        print(_info.ToString());
     }
 
-    void Init()
+    public void Init()
     {
-        _player = null;
         _hp = 100;
         CurHp = _hp;
         _moveSpeed = 100f;
         _attackSpeed = 1f;
-        _doubleJump = false;
-        CurWeapon = null;
+        _jumpLeft = MaxJump;
     }
 
     [PunRPC]
@@ -118,10 +118,5 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
     public virtual void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
 
-    }
-
-    private void OnApplicationQuit()
-    {
-        FirebaseFirestoreManager.Instance.UpdateUserInfo(FirebaseAuthManager.Instance._user, _info);
     }
 }

@@ -113,6 +113,9 @@ MonoBehaviour:
   - HitWithEffect
   - RoundFinishEffectCorRPC
   - EnableGameFinishUI
+  - SetTimerActiveRPC
+  - StartTimer
+  - StopTimer
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

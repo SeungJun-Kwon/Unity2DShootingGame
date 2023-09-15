@@ -15,7 +15,8 @@ public class PlayerHit : IState
 
     public void OnEnter()
     {
-        _playerController.photonView.RPC("BlinkRPC", RpcTarget.All);
+        if(_playerController.photonView.IsMine)
+            _playerController.photonView.RPC("BlinkRPC", RpcTarget.All);
 
         if ((Vector2)_playerController._gunPart.localPosition == _playerController._gunLeftPos)
             _playerController._rigidbody.AddForce(Vector2.right * 5f, ForceMode2D.Impulse);

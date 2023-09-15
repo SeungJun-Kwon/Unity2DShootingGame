@@ -22,5 +22,5 @@ MonoBehaviour:
   _shootEffect: {fileID: 979571032, guid: f29d2e1acc3b3e94dbd2b9dd63e13975, type: 3}
   _shootEffectAnim: {fileID: 9100000, guid: d05b368bb5e5e1d44addc30d2fd2a3d6, type: 2}
   _hitEffectMat: {fileID: 2100000, guid: 68334d56da6cd0044bdfb728a30c93d7, type: 2}
-  _damage: 5
+  _damage: 15
   _attackSpeed: 120

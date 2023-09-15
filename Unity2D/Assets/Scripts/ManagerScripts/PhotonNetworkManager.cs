@@ -25,7 +25,6 @@ public class PhotonNetworkManager : MonoBehaviourPunCallbacks, IConnectionCallba
 
         DontDestroyOnLoad(this);
 
-        Screen.SetResolution(960, 540, false);
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
         PhotonNetwork.AutomaticallySyncScene = true;
