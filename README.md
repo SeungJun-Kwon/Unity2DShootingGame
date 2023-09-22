@@ -37,3 +37,18 @@ Firebase Firestore도 연동하기에 계정 정보, 닉네임 정보 등 중복
 **[구동 화면]**
 
 <img src="https://github.com/SeungJun-Kwon/Unity2DShootingGame/assets/80217301/e03421ac-2acc-49b8-ba68-0243923d38c8" width="640" height="360">
+
+## 유저 정보
+로비 및 룸 화면에서 확인할 수 있는 유저 정보
+
+회원 가입 시 자동으로 파이어베이스 파이어스토어에 유저 정보가 등록된다.
+
+또한 UserInfo 클래스와 안에 있는 변수들을 파이어스토어에 매핑하기 위해 FirestoreData, FirestoreProperty를 사용하였다.
+
+<img src="https://github.com/SeungJun-Kwon/Unity2DShootingGame/assets/80217301/bb2632e1-cb59-4e6b-ae03-8f742362446d" width="640" height="360">
+
+파이어베이스와 연동하여 게임 내에서 유저 정보를 Save, Load가 가능하다.
+
+**[구동 화면]**
+
+<img src="https://github.com/SeungJun-Kwon/Unity2DShootingGame/assets/80217301/706490ba-5549-4c8b-9e5a-895caba380c2" width="640" height="360">
