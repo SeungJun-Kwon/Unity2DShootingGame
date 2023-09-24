@@ -37,7 +37,7 @@ public class PlayerAttack : IState, IPunObservable
             if (_spriteSize == Vector2.zero)
                 _spriteSize = _playerController._playerManager.CurWeapon._bullet.bounds.size;
 
-            _attackDuration = _playerController._playerManager._attackSpeed * (100f / (_playerController._playerManager.CurWeapon._attackSpeed + _playerController._playerManager._curStat._attackSpeed));
+            _attackDuration = 100f / _playerController._playerManager._curStat._attackSpeed;
 
             if (_playerController._gunPart.localPosition == (Vector3)_playerController._gunRightPos)
                 _dir = Vector2.right;
@@ -56,8 +56,8 @@ public class PlayerAttack : IState, IPunObservable
 
                 PhotonNetwork.Instantiate("Prefabs/Players/Bullet", multiPos, Quaternion.identity).TryGetComponent(out _bulletGO);
                 _bulletGO.photonView.RPC("SetWeapon", RpcTarget.All, _playerController._playerManager.CurWeapon._name, _dir);
-                _bulletGO.Shoot();
-                _bulletGO._upgradeDamage = _playerController._playerManager._curStat._damage;
+                _bulletGO._increaseDamage = _playerController._playerManager._curStat._damage;
+                _bulletGO.Shoot();                
             }
 
             if (_playerController._playerManager.CurWeapon._shootEffect != null || _playerController._playerManager.CurWeapon._shootEffectAnim != null)

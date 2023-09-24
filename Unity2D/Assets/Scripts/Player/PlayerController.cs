@@ -221,7 +221,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         // 버퍼에 너무 많이 저장되면, 네트워크가 약한 클라이언트는 끊어질 수 있다고 한다.
         photonView.RPC("MoveXRPC", RpcTarget.AllBuffered, moveX);
 
-        _rigidbody.velocity = new Vector2(moveX * _moveSpeed * (_playerManager._moveSpeed / 100f), _rigidbody.velocity.y);
+        _rigidbody.velocity = new Vector2(moveX * _moveSpeed * (_playerManager._curStat._moveSpeed / 100f), _rigidbody.velocity.y);
     }
 
     [PunRPC]
@@ -453,8 +453,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         yield return new WaitForSeconds(0.5f);
 
-        if(PhotonNetwork.IsMasterClient)
-            GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.RoundFinishEffectCorRPC), RpcTarget.All);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            GameManager.Instance._isTimerRunning = true;
+            GameManager.Instance.StopTimer();
+        }
     }
 
     public GameObject Instantiate(GameObject go, Transform parent = null)

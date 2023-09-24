@@ -47,8 +47,15 @@ public class GameManager : MonoBehaviourPunCallbacks
                     if(_playerPointDic[_me] < _gamePoint)
                         _playerPointDic[_me]++;
 
-                    if (_playerPointDic[_me] == _gamePoint && PhotonNetwork.IsMasterClient)
-                        photonView.RPC(nameof(GameFinish), RpcTarget.All);
+                    if (_playerPointDic[_me] == _gamePoint)
+                    {
+                        if (PhotonNetwork.IsMasterClient)
+                            photonView.RPC(nameof(GameFinish), RpcTarget.All);
+
+                        break;
+                    }
+
+                    SelectUpgrade(_me._playerManager);
                     break;
                 case GameState.LOSE:
                     if ((bool)_other._playerManager._player.CustomProperties["Player1"] && _playerPointDic[_other] < GameUIController.Instance._player1Point.Count)
@@ -59,9 +66,11 @@ public class GameManager : MonoBehaviourPunCallbacks
                     if (_playerPointDic[_other] < _gamePoint)
                         _playerPointDic[_other]++;
 
-                    if (_playerPointDic[_other] == _gamePoint && PhotonNetwork.IsMasterClient)
+                    if (_playerPointDic[_other] == _gamePoint)
                     {
-                        photonView.RPC(nameof(GameFinish), RpcTarget.All);
+                        if (PhotonNetwork.IsMasterClient)
+                            photonView.RPC(nameof(GameFinish), RpcTarget.All);
+
                         break;
                     }
 
@@ -91,9 +100,11 @@ public class GameManager : MonoBehaviourPunCallbacks
                     if (_playerPointDic[_other] < _gamePoint)
                         _playerPointDic[_other]++;
 
-                    if ((_playerPointDic[_me] == _gamePoint || _playerPointDic[_other] == _gamePoint) && PhotonNetwork.IsMasterClient)
+                    if (_playerPointDic[_me] == _gamePoint || _playerPointDic[_other] == _gamePoint)
                     {
-                        photonView.RPC(nameof(GameFinish), RpcTarget.All);
+                        if (PhotonNetwork.IsMasterClient)
+                            photonView.RPC(nameof(GameFinish), RpcTarget.All);
+
                         break;
                     }
 
@@ -120,7 +131,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     float _upgradeTime = 10f;
     float _roundTime = 60f;
 
-    bool _isTimerRunning = false;
+    int _upgradeCount = 0;
+
+    [HideInInspector] public bool _isTimerRunning = false;
 
     private void Awake()
     {
@@ -140,7 +153,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             GameObject.Find("Player2StartPos").TryGetComponent(out _player2StartPos);
 
         // Test
-        PhotonNetwork.LocalPlayer.NickName = GeneratePassword(5);
+        // PhotonNetwork.LocalPlayer.NickName = GeneratePassword(5);
     }
 
     private const string PASSWORD_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -243,16 +256,37 @@ public class GameManager : MonoBehaviourPunCallbacks
         AbilitySelectManager.Instance.SelectWeapon();
 
         if (PhotonNetwork.IsMasterClient)
+        {
             StartTimer(_upgradeTime);
+            e_TimerOver.AddListener(() => photonView.RPC(nameof(SelectRandomAbility), RpcTarget.All));
+        }
     }
 
     public void SelectUpgrade(PlayerManager playerManager)
     {
-        AbilitySelectManager.Instance.gameObject.SetActive(true);
-        AbilitySelectManager.Instance.SelectUpgrade(playerManager);
+        if (_curState == GameState.LOSE || _curState == GameState.DRAW)
+        {
+            AbilitySelectManager.Instance.gameObject.SetActive(true);
+            AbilitySelectManager.Instance.SelectUpgrade(playerManager);
+        }
+        else
+            GameUIController.Instance._waitPanel.SetActive(true);
 
         if (PhotonNetwork.IsMasterClient)
+        {
             StartTimer(_upgradeTime);
+            Debug.Log("SelectRandomAbility 리스너 추가");
+            e_TimerOver.AddListener(() => photonView.RPC(nameof(SelectRandomAbility), RpcTarget.All));
+        }
+    }
+
+    [PunRPC]
+    public void SelectRandomAbility()
+    {
+        if (!AbilitySelectManager.Instance.gameObject.activeSelf)
+            return;
+
+        AbilitySelectManager.Instance.SelectRandom();
     }
 
     [PunRPC]
@@ -272,16 +306,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             AbilitySelectManager.Instance.gameObject.SetActive(false);
 
-            photonView.RPC(nameof(StopTimer), RpcTarget.MasterClient);
-
             foreach (var p in _players)
             {
                 p.gameObject.SetActive(true);
                 p._playerManager.photonView.RPC(nameof(p._playerManager.SetWeapon), RpcTarget.All, _playerWeaponDic[p]);
             }
 
-            if(PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient)
+            {
+                e_TimerOver.RemoveAllListeners();
+                StopTimer();
                 photonView.RPC(nameof(RoundStart), RpcTarget.All);
+            }
         }
     }
 
@@ -292,15 +328,31 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             if (p.photonView.Owner.NickName == playerName)
             {
-                if(upgradeName != "null" && PhotonNetwork.IsMasterClient)
+                if (upgradeName != "null" && PhotonNetwork.IsMasterClient)
+                {
                     p._playerManager.photonView.RPC(nameof(p._playerManager.AddUpgrade), RpcTarget.All, upgradeName);
+                    _upgradeCount += 1;
+                }
 
-                AbilitySelectManager.Instance.gameObject.SetActive(false);
+                if(AbilitySelectManager.Instance.gameObject.activeSelf)
+                    AbilitySelectManager.Instance.gameObject.SetActive(false);
+
+                if (GameUIController.Instance._waitPanel.activeSelf)
+                    GameUIController.Instance._waitPanel.SetActive(false);
 
                 if (PhotonNetwork.IsMasterClient)
-                    photonView.RPC(nameof(RoundStart), RpcTarget.All);
-
-                return;
+                {
+                    // 비겼을 때는 두 명이 업그레이드를 해야됨.
+                    // 비기지 않았을 경우 패자만 업그레이드를 함
+                    if ((_curState == GameState.DRAW && _upgradeCount == 2) || (_curState != GameState.DRAW && _upgradeCount == 1))
+                    {
+                        Debug.Log("리스너 지우고 StopTimer");
+                        e_TimerOver.RemoveAllListeners();
+                        StopTimer();
+                        Debug.Log("RoundStart RPC");
+                        photonView.RPC(nameof(RoundStart), RpcTarget.All);
+                    }
+                }
             }
         }
     }
@@ -337,9 +389,12 @@ public class GameManager : MonoBehaviourPunCallbacks
             p.Init();
         }
 
-        photonView.RPC(nameof(StartTimer), RpcTarget.MasterClient, _roundTime);
-        e_TimerOver.RemoveAllListeners();
-        e_TimerOver.AddListener(() => photonView.RPC(nameof(RoundFinishEffectCorRPC), RpcTarget.All));
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartTimer(_roundTime);
+            _upgradeCount = 0;
+            e_TimerOver.AddListener(() => photonView.RPC(nameof(RoundFinishEffectCorRPC), RpcTarget.All));
+        }            
     }
 
     [PunRPC]
@@ -404,6 +459,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         yield return new WaitForSeconds(2f);
 
+        e_TimerOver.RemoveAllListeners();
+
         if (PhotonNetwork.IsMasterClient)
             photonView.RPC(nameof(RoundFinish), RpcTarget.All);
     }
@@ -415,33 +472,44 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsMasterClient)
         {
-            string winnerName = "", loserName = "";
+            string[] winnerName = new string[2];
+            string loserName = "";
+            int winnerCount = 0;
 
-            foreach (var p in _players)
+            foreach(var p in _players)
             {
                 if (_playerPointDic[p] == _gamePoint)
-                    winnerName = p.photonView.Owner.NickName;
+                {
+                    winnerName[winnerCount] = p.photonView.Owner.NickName;
+                    winnerCount++;
+                }
                 else
                     loserName = p.photonView.Owner.NickName;
             }
 
-            GameUIController.Instance._gameFinishUI.EnableGameFinishUI(winnerName, loserName);
+            if (winnerCount == 0)
+                PhotonNetwork.LeaveRoom();
+            else if (winnerCount == 1)
+                GameUIController.Instance._gameFinishUI.EnableGameFinishUI(winnerName[0], loserName, false);
+            else
+                GameUIController.Instance._gameFinishUI.EnableGameFinishUI(winnerName[0], winnerName[1], true);
         }
     }
 
     [PunRPC]
-    void SetTimer(float value) => _timer = value;
+    public void SetTimer(float time) => _timer = time;
 
     // 타이머 시작 메서드. MasterClient에서만 시작함
-    [PunRPC]
     public void StartTimer(float time)
     {
         if (_isTimerRunning || !PhotonNetwork.IsMasterClient)
             return;
 
+        _timer = time;
+        photonView.RPC(nameof(SetTimerActiveRPC), RpcTarget.All, true, _timer);
+        photonView.RPC(nameof(SetTimer), RpcTarget.All, _timer);
+
         _isTimerRunning = true;
-        photonView.RPC(nameof(SetTimer), RpcTarget.All, time);
-        photonView.RPC(nameof(SetTimerActiveRPC), RpcTarget.All, true, time);
     }
 
     private void UpdateTimer()
@@ -450,26 +518,23 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
 
         _timer -= Time.deltaTime;
-        photonView.RPC(nameof(SetTimer), RpcTarget.Others, _timer);
-        
-        if (_timer <= 0f)
-        {
-            // 타이머 종료 시 이벤트 호출
-            e_TimerOver.Invoke();
+        photonView.RPC(nameof(SetTimer), RpcTarget.All, _timer);
 
+        // 타이머 종료 시 이벤트 호출
+        if (_timer <= 0f)
             StopTimer();
-        }
     }
 
-    [PunRPC]
     public void StopTimer()
     {
         if (!_isTimerRunning || !PhotonNetwork.IsMasterClient)
             return;
 
         _isTimerRunning = false;
+        _timer = 0f;
+        e_TimerOver.Invoke();
         photonView.RPC(nameof(SetTimerActiveRPC), RpcTarget.All, false, 0f);
-        photonView.RPC(nameof(SetTimer), RpcTarget.All, 0f);
+        photonView.RPC(nameof(SetTimer), RpcTarget.All, _timer);
     }
 
     [PunRPC]
@@ -478,6 +543,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         base.OnPlayerLeftRoom(otherPlayer);
+
+        if (GameUIController.Instance._gameFinishUI.gameObject.activeSelf)
+            return;
 
         _playerPointDic[_me] = _gamePoint;
 

@@ -8,6 +8,8 @@ public class UserInfoUIManager : MonoBehaviour
 {
     public static UserInfoUIManager Instance;
 
+    [Header("UserInfo")]
+
     [SerializeField] TMP_Text _userName;
     [SerializeField] Image _userProfile;
     [SerializeField] TMP_Text _userWin;
@@ -17,7 +19,16 @@ public class UserInfoUIManager : MonoBehaviour
     [SerializeField] Button _saveButton;
     [SerializeField] Button _closeButton;
 
+    [Header("SetUserProfile")]
+    [SerializeField] ProfileImageUI _profileImage;
+    [SerializeField] GameObject _setUserProfileUI;
+    [SerializeField] RectTransform _contentPanel;
+
+    [HideInInspector] public ProfileImageUI _selectedProfile;
+
     UserInfo _curInfo;
+
+    Button _profileImageButton;
 
     private void Awake()
     {
@@ -25,6 +36,15 @@ public class UserInfoUIManager : MonoBehaviour
             Instance = this;
         else if (Instance != this)
             Destroy(gameObject);
+
+        _userProfile.gameObject.TryGetComponent(out _profileImageButton);
+
+        for(int i = 0; i < ProfileSpriteManager.Instance._profileSprites.Count; i++)
+        {
+            Instantiate(_profileImage, _contentPanel).SetSprite(ProfileSpriteManager.Instance._profileSprites[i]);
+        }
+
+        _setUserProfileUI.SetActive(false);
 
         gameObject.SetActive(false);
     }
@@ -44,6 +64,7 @@ public class UserInfoUIManager : MonoBehaviour
     {
         _saveButton.gameObject.SetActive(isMine);
         _userIntro.readOnly = !isMine;
+        _profileImageButton.enabled = isMine;
 
         _curInfo = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(nickName);
 
@@ -54,6 +75,7 @@ public class UserInfoUIManager : MonoBehaviour
             return;
         }
 
+        _userProfile.sprite = ProfileSpriteManager.Instance.GetSprite(_curInfo.Profile);
         _userName.text = _curInfo.Name;
         _userWin.text = _curInfo.Win.ToString();
         _userLose.text = _curInfo.Lose.ToString();
@@ -65,5 +87,32 @@ public class UserInfoUIManager : MonoBehaviour
         _curInfo.Intro = _userIntro.text;
 
         FirebaseFirestoreManager.Instance.UpdateUserInfo(FirebaseAuthManager.Instance._user, _curInfo);
+
+        gameObject.SetActive(false);
+    }
+
+    public void OpenSetUserProfileUI()
+    {
+        _selectedProfile = null;
+        _setUserProfileUI.SetActive(true);
+    }
+
+    public void CloseSetUserProfileUI()
+    {
+        _selectedProfile = null;
+        _setUserProfileUI.SetActive(false);
+    }
+
+    public void SaveUserProfile()
+    {
+        if (_selectedProfile != null) {
+            _curInfo.Profile = _selectedProfile._image.sprite.name;
+            _userProfile.sprite = _selectedProfile._image.sprite;
+        }
+
+        if(RoomUIManager.Instance.gameObject.activeSelf)
+            RoomUIManager.Instance.photonView.RPC(nameof(RoomUIManager.Instance.SetPlayerProfile), Photon.Pun.RpcTarget.All, Photon.Pun.PhotonNetwork.LocalPlayer, _curInfo.Profile);
+
+        _setUserProfileUI.SetActive(false);
     }
 }

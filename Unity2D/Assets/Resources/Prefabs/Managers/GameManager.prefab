@@ -55,6 +55,7 @@ MonoBehaviour:
   _player1StartPos: {fileID: 0}
   _player2StartPos: {fileID: 0}
   _curState: 0
+  _isTimerRunning: 0
 --- !u!114 &3326231574306442162
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -40,12 +40,25 @@ public class SignUpSystem : MonoBehaviour
     {
         if (!Check())
         {
-            print("입력되지 않은 칸이 있습니다.");
+            if (NoticeMessageController.Instance.gameObject.activeSelf)
+                NoticeMessageController.Instance.gameObject.SetActive(false);
+            NoticeMessageController.Instance.gameObject.SetActive(true);
+            NoticeMessageController.Instance.SetText("입력되지 않은 칸이 있습니다.");
+
             return;
         }
 
         UserInfo userInfo = new UserInfo(_name);
         
         Result = await FirebaseAuthManager.Instance.SignUp(_id, _pw, userInfo);
+
+        if (NoticeMessageController.Instance.gameObject.activeSelf)
+            NoticeMessageController.Instance.gameObject.SetActive(false);
+        NoticeMessageController.Instance.gameObject.SetActive(true);
+
+        if (!Result)
+            NoticeMessageController.Instance.SetText("회원가입 실패");
+        else 
+            NoticeMessageController.Instance.SetText("회원가입 성공!");
     }
 }

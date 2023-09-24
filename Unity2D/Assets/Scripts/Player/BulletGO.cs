@@ -9,7 +9,7 @@ public class BulletGO : MonoBehaviourPunCallbacks, IPunObservable
 {
     public Vector2 _dir;
     public float _power = 0f;
-    public int _upgradeDamage = 0;
+    public int _increaseDamage = 0;
 
     protected SpriteRenderer _spriteRenderer;
     protected Animator _animator;
@@ -134,11 +134,7 @@ public class BulletGO : MonoBehaviourPunCallbacks, IPunObservable
             if (_curWeapon._type == WeaponType.Normal && photonView.IsMine)
                 PhotonNetwork.Destroy(gameObject);
 
-            Vector2 hitPos = collision.ClosestPoint(transform.position);
-            float distanceX = _dir == Vector2.right ? collision.transform.position.x - transform.position.x : transform.position.x - collision.transform.position.x;
-
-            if (_curWeapon._type == WeaponType.Laser)
-                hitPos = new Vector2(hitPos.x + distanceX, hitPos.y);
+            Vector2 hitPos = transform.position;
 
             PhotonNetwork.Instantiate(_hitEffectPath, hitPos, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
             hitEffect.photonView.RPC(nameof(hitEffect.SetWeapon), RpcTarget.All, _curWeapon._name);
@@ -148,13 +144,14 @@ public class BulletGO : MonoBehaviourPunCallbacks, IPunObservable
             if (!collision.gameObject.TryGetComponent(out PlayerController playerController) || !playerController.Available)
                 return;
 
-            playerController.photonView.RPC(nameof(playerController.Hit), RpcTarget.All, _curWeapon._damage + Mathf.RoundToInt(_curWeapon._damage * (_upgradeDamage / 100f)));
+            playerController.photonView.RPC(nameof(playerController.Hit), RpcTarget.All, _curWeapon._damage + Mathf.RoundToInt(_curWeapon._damage * (_increaseDamage / 100f)));
 
-            Vector2 hitPos = collision.ClosestPoint(transform.position);
-            float distanceX = _dir == Vector2.right ? collision.transform.position.x - transform.position.x : transform.position.x - collision.transform.position.x;
+            Vector2 hitPos = Vector2.zero;
 
-            if (_curWeapon._type == WeaponType.Laser)
-                hitPos = new Vector2(hitPos.x + distanceX, hitPos.y);
+            if (_curWeapon._type == WeaponType.Normal)
+                hitPos = transform.localPosition;
+            else if (_curWeapon._type == WeaponType.Laser)
+                hitPos = collision.transform.localPosition;
 
             PhotonNetwork.Instantiate(_hitEffectPath, hitPos, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
             hitEffect.photonView.RPC(nameof(hitEffect.SetWeapon), RpcTarget.All, _curWeapon._name);
@@ -171,7 +168,7 @@ public class BulletGO : MonoBehaviourPunCallbacks, IPunObservable
             if(_curWeapon._type == WeaponType.Normal && photonView.IsMine)
                 PhotonNetwork.Destroy(gameObject);
 
-            PhotonNetwork.Instantiate(_hitEffectPath, collision.GetContact(0).point, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
+            PhotonNetwork.Instantiate(_hitEffectPath, transform.position, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
             hitEffect.photonView.RPC(nameof(hitEffect.SetWeapon), RpcTarget.All, _curWeapon._name);
         }
         else if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy"))
@@ -179,7 +176,7 @@ public class BulletGO : MonoBehaviourPunCallbacks, IPunObservable
             if (!collision.gameObject.TryGetComponent(out PlayerController playerController) || !playerController.Available)
                 return;
 
-            playerController.photonView.RPC(nameof(playerController.Hit), RpcTarget.All, _curWeapon._damage + Mathf.RoundToInt(_curWeapon._damage * (_upgradeDamage / 100f)));
+            playerController.photonView.RPC(nameof(playerController.Hit), RpcTarget.All, _curWeapon._damage + Mathf.RoundToInt(_curWeapon._damage * (_increaseDamage / 100f)));
 
             PhotonNetwork.Instantiate(_hitEffectPath, collision.GetContact(0).point, Quaternion.identity).TryGetComponent(out HitEffect hitEffect);
             hitEffect.photonView.RPC(nameof(hitEffect.SetWeapon), RpcTarget.All, _curWeapon._name);

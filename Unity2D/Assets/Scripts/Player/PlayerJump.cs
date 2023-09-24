@@ -15,6 +15,7 @@ public class PlayerJump : IState, IPunObservable
     public void OnEnter()
     {
         _playerController.Jump();
+        _playerController.InstantiateObject("Prefabs/Effects/LandingEffect", _playerController.transform.position, Quaternion.identity);
         _playerController.PlayAnimation(State.JUMP);
         _playerController._playerManager._jumpLeft--;
     }

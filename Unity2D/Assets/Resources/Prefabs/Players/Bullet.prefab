@@ -229,5 +229,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dir: {x: 0, y: 0}
   _power: 0
-  _upgradeDamage: 0
+  _increaseDamage: 0
   _hitEffectPath: Prefabs/Effects/HitEffect

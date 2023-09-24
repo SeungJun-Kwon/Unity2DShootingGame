@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ecf39890d547ab4eaabd06300dfda67, type: 3}
+  m_Name: AllRounder
+  m_EditorClassIdentifier: 
+  _name: "\uC62C\uB77C\uC6B4\uB354"
+  _desc: "\uBAA8\uB4E0 \uB2A5\uB825\uCE58\uAC00 \uC18C\uD3ED\uC529 3\uBC88\uAE4C\uC9C0
+    \uC99D\uAC00\uD55C\uB2E4."
+  _icon: {fileID: 21300000, guid: 6664364781b567844a6656cb813ac402, type: 3}
+  _increaseStat:
+  - _hp: 5
+    _damage: 5
+    _moveSpeed: 10
+    _attackSpeed: 10
+    _multiShot: 0
+    _doubleJump: 0
+  - _hp: 10
+    _damage: 10
+    _moveSpeed: 20
+    _attackSpeed: 20
+    _multiShot: 0
+    _doubleJump: 0
+  - _hp: 20
+    _damage: 20
+    _moveSpeed: 40
+    _attackSpeed: 40
+    _multiShot: 0
+    _doubleJump: 0

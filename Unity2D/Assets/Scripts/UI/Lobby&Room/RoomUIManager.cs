@@ -148,14 +148,7 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
         _roomName.text = PhotonNetwork.CurrentRoom.CustomProperties["Name"].ToString();
         MapIndex = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties["MapIndex"].ToString());
 
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-        {
-            photonView.RPC("SetPlayer1RPC", RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer);
-            photonView.RPC("SetPlayerHost", RpcTarget.AllBuffered, _player1, true);
-            IsHost = true;
-        }
-        else
-            IsHost = false;
+        EnterRoom();
     }
 
     private void Start()
@@ -163,16 +156,29 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
         transform.Find("ChattingSystem").gameObject.TryGetComponent(out _chattingSystem);
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
+    async void EnterRoom()
     {
-        if (_player1 == null)
-            photonView.RPC("SetPlayer1RPC", RpcTarget.AllBuffered, newPlayer);
+        UserInfo userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(PhotonNetwork.LocalPlayer.NickName);
+
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        {
+            IsHost = true;
+            photonView.RPC("SetPlayer1RPC", RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer, userInfo.Profile);
+            photonView.RPC("SetPlayerHost", RpcTarget.AllBuffered, _player1, IsHost);
+        }
         else
-            photonView.RPC("SetPlayer2RPC", RpcTarget.AllBuffered, newPlayer);
+        {
+            IsHost = false;
 
-        photonView.RPC("SetPlayerHost", RpcTarget.All, newPlayer, false);
+            if (_player1 == null)
+                photonView.RPC("SetPlayer1RPC", RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer, userInfo.Profile);
+            else
+                photonView.RPC("SetPlayer2RPC", RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer, userInfo.Profile);
 
-        _chattingSystem.photonView.RPC("NoticeInput", RpcTarget.All, $"{newPlayer.NickName}¥‘¿Ã ¿‘¿Â«œºÃΩ¿¥œ¥Ÿ.");
+            photonView.RPC("SetPlayerHost", RpcTarget.All, PhotonNetwork.LocalPlayer, false);
+
+            _chattingSystem.photonView.RPC("NoticeInput", RpcTarget.All, $"{PhotonNetwork.LocalPlayer.NickName}¥‘¿Ã ¿‘¿Â«œºÃΩ¿¥œ¥Ÿ.");
+        }
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -183,12 +189,12 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
 
         if (_player1 == otherPlayer)
         {
-            photonView.RPC("SetPlayer1RPC", RpcTarget.All, nullPlayer);
+            photonView.RPC("SetPlayer1RPC", RpcTarget.All, nullPlayer, "null");
             photonView.RPC("SetPlayerHost", RpcTarget.AllBuffered, _player2, true);
         }
         else
         {
-            photonView.RPC("SetPlayer2RPC", RpcTarget.All, nullPlayer);
+            photonView.RPC("SetPlayer2RPC", RpcTarget.All, nullPlayer, "null");
             photonView.RPC("SetPlayerHost", RpcTarget.AllBuffered, _player1, true);
         }
 
@@ -198,14 +204,14 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void SetPlayer1RPC(Player player)
+    public void SetPlayer1RPC(Player player, string profileSprite)
     {
         _player1Frame.gameObject.SetActive(false);
         _player1Host.gameObject.SetActive(false);
 
         if (player == null)
         {
-            _player1Image.color = Color.white;
+            _player1Image.sprite = null;
             _player1Name.text = "";
             _player1.CustomProperties["Player1"] = false;
             _player1.CustomProperties["Player2"] = false;
@@ -214,7 +220,7 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
         else
         {
             _player1 = player;
-            _player1Image.color = Color.red;
+            _player1Image.sprite = ProfileSpriteManager.Instance.GetSprite(profileSprite);
             _player1Name.text = _player1.NickName;
             _player1.CustomProperties["Player1"] = true;
             _player1.CustomProperties["Player2"] = false;
@@ -222,14 +228,14 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void SetPlayer2RPC(Player player)
+    public void SetPlayer2RPC(Player player, string profileSprite)
     {
         _player2Frame.gameObject.SetActive(false);
         _player2Host.gameObject.SetActive(false);
 
         if (player == null)
         {
-            _player2Image.color = Color.white;
+            _player2Image.sprite = null;
             _player2Name.text = "";
             _player2.CustomProperties["Player1"] = false;
             _player2.CustomProperties["Player2"] = false;
@@ -238,7 +244,7 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
         else
         {
             _player2 = player;
-            _player2Image.color = Color.blue;
+            _player2Image.sprite = ProfileSpriteManager.Instance.GetSprite(profileSprite);
             _player2Name.text = _player2.NickName;
             _player2.CustomProperties["Player1"] = false;
             _player2.CustomProperties["Player2"] = true;
@@ -358,5 +364,14 @@ public class RoomUIManager : MonoBehaviourPunCallbacks
 
         UserInfoUIManager.Instance.gameObject.SetActive(true);
         UserInfoUIManager.Instance.LoadUserInfo(nickName, PhotonNetwork.LocalPlayer.NickName == nickName ? true : false);
+    }
+
+    [PunRPC]
+    public void SetPlayerProfile(Player player, string sprite)
+    {
+        if ((bool)player.CustomProperties["Player1"])
+            _player1Image.sprite = ProfileSpriteManager.Instance.GetSprite(sprite);
+        else
+            _player2Image.sprite = ProfileSpriteManager.Instance.GetSprite(sprite);
     }
 }

@@ -23,12 +23,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
             _curWeapon = value;
             if (value == null)
             {
-                _damage = 0;
+                _curStat._damage = 0;
                 return;
             }
 
             photonView.RPC("OnChangeWeaponRPC", RpcTarget.All);
-            _damage = value._damage;
+            _curStat._attackSpeed = value._attackSpeed;
             _weaponName = value._name;
         }
     }
@@ -36,16 +36,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
 
     [HideInInspector] public Player _player;
 
-    public IncreaseStat _curStat;
-
-    public int _hp, _damage;
-    public float _moveSpeed, _attackSpeed;
+    public Stat _curStat;
 
     int _maxJump = 1;
     public int MaxJump
     {
-        get { return _maxJump + _curStat._doubleJump; }
-        set { _maxJump = value + _curStat._doubleJump; }
+        get { return _maxJump + _curStat._multiJump; }
+        set { _maxJump = value + _curStat._multiJump; }
     }
 
     public int _jumpLeft;
@@ -64,9 +61,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
             if (GameUIController.Instance != null && _player != null)
             {
                 if ((bool)_player.CustomProperties["Player1"])
-                    GameUIController.Instance._player1Hp.fillAmount = value / _hp;
+                    GameUIController.Instance._player1Hp.fillAmount = value / _curStat._hp;
                 else
-                    GameUIController.Instance._player2Hp.fillAmount = value / _hp;
+                    GameUIController.Instance._player2Hp.fillAmount = value / _curStat._hp;
             }
         }
     }
@@ -77,12 +74,21 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
         _info = await FirebaseFirestoreManager.Instance.LoadUserInfoByEmail(email);
     }
 
+    private void Awake()
+    {
+        _curStat._hp = 100;
+        CurHp = _curStat._hp;
+        _curStat._damage = 0;
+        _curStat._moveSpeed = 100f;
+        _curStat._attackSpeed = 1f;
+        _curStat._multiShot = 0;
+        _curStat._multiJump = 0;
+        _jumpLeft = MaxJump;
+    }
+
     public void Init()
     {
-        _hp = 100;
-        CurHp = _hp;
-        _moveSpeed = 100f;
-        _attackSpeed = 1f;
+        CurHp = _curStat._hp;
         _jumpLeft = MaxJump;
     }
 

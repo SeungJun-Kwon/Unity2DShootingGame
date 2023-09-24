@@ -11,6 +11,11 @@ public class GameUIController : MonoBehaviour
 
     [SerializeField] AbilitySelectManager _abilitySelectManager;
 
+    [Space(5)]
+    public GameObject _waitPanel;
+
+    [Space(5)]
+
     [Header("Player UI")]
     public GameObject _playerUI;
 

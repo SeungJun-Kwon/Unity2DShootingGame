@@ -93,6 +93,38 @@ public class FirebaseFirestoreManager
         return Task.FromResult(3);
     }
 
+    public async Task<bool> FindUser(string email, string nickName)
+    {
+        try
+        {
+            var result = await _userStore.Collection(_userInfo).Document(email).GetSnapshotAsync();
+            if (result.Exists)
+                return true;
+            else
+            {
+                try
+                {
+                    var query = await _userStore.Collection(_userInfo).WhereEqualTo("name", nickName).GetSnapshotAsync();
+
+                    if (query.Count > 0)
+                        return true;
+                    else
+                        return false;
+                }
+                catch (FirestoreException e)
+                {
+                    Debug.Log($"유저 데이터 탐색 실패 : {e.Message}");
+                    return false;
+                }
+            }
+        }
+        catch (FirestoreException e)
+        {
+            Debug.Log($"유저 데이터 탐색 실패 : {e.Message}");
+            return false;
+        }
+    }
+
     public void UpdateUserInfo(FirebaseUser user, UserInfo userInfo)
     {
         if (userInfo.Name == "")
@@ -132,10 +164,16 @@ public class FirebaseFirestoreManager
             {
                 UserInfo userInfo = result.ConvertTo<UserInfo>();
 
+                Debug.Log("유저 데이터 로드 성공");
+
                 return userInfo;
             }
             else
+            {
+                Debug.Log("유저 없음");
+
                 return null;
+            }
         }
         catch (FirestoreException e)
         {

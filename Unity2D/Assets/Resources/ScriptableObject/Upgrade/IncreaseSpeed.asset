@@ -12,16 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ecf39890d547ab4eaabd06300dfda67, type: 3}
   m_Name: IncreaseSpeed
   m_EditorClassIdentifier: 
-  _name: "\uC5F0\uC0AC\uB825 \uC99D\uAC00"
-  _desc: "\uAE30\uBCF8 \uC5F0\uC0AC\uB825\uC774 (25/50/100)% \uC99D\uAC00\uD55C\uB2E4."
-  _icon: {fileID: 21300000, guid: 2259d945ebcab424588cef6daf11b9fa, type: 3}
+  _name: "\uC18D\uB3C4 \uC99D\uAC00"
+  _desc: "\uBAA8\uB4E0 \uC18D\uB3C4\uAC00 (20/40/80)% \uC99D\uAC00\uD55C\uB2E4."
+  _icon: {fileID: 21300000, guid: 63ec63ff2b0e56942b391a562fde1126, type: 3}
   _increaseStat:
-  - _damage: 0
-    _attackSpeed: 25
+  - _hp: 0
+    _damage: 0
+    _moveSpeed: 20
+    _attackSpeed: 20
     _multiShot: 0
-  - _damage: 0
-    _attackSpeed: 50
+    _multiJump: 0
+  - _hp: 0
+    _damage: 0
+    _moveSpeed: 40
+    _attackSpeed: 40
     _multiShot: 0
-  - _damage: 0
-    _attackSpeed: 100
+    _multiJump: 0
+  - _hp: 0
+    _damage: 0
+    _moveSpeed: 80
+    _attackSpeed: 80
     _multiShot: 0
+    _multiJump: 0

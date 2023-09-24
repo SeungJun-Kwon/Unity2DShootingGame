@@ -32,17 +32,35 @@ public class FirebaseAuthManager
         _auth = FirebaseAuth.DefaultInstance;
     }
 
-    public void SignUp(string email, string pw, UserInfo userInfo, ref bool result)
+    public bool IsEmailValid(string email)
+    {
+        // 이메일 주소 패턴을 정의합니다.
+        string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+        // 이메일 주소가 패턴과 일치하는지 확인합니다.
+        return System.Text.RegularExpressions.Regex.IsMatch(email, pattern);
+    }
+
+    public async Task<bool> SignUp(string email, string pw, UserInfo userInfo)
     {
         FirebaseUser user = null;
-        _auth.CreateUserWithEmailAndPasswordAsync(email, pw).ContinueWith(task => 
+
+        bool result = false;
+
+        // User를 찾아서 해당 이메일이나 닉네임을 갖고 있을 경우 가입 실패
+        var findUser = await FirebaseFirestoreManager.Instance.FindUser(email, userInfo.Name);
+
+        if (findUser || !IsEmailValid(email))
+            return false;
+
+        await _auth.CreateUserWithEmailAndPasswordAsync(email, pw).ContinueWith(async task => 
         {
-            if(task.IsCanceled)
+            if (task.IsCanceled)
             {
                 Debug.Log("회원가입 취소");
                 return;
             }
-            else if(task.IsFaulted)
+            else if (task.IsFaulted)
             {
                 // 실패 이유 => 이메일이 비정상, 비밀번호가 너무 간단, 이미 가입된 이메일 등등
                 Debug.Log("회원가입 실패 : " + task.Exception);
@@ -50,50 +68,24 @@ public class FirebaseAuthManager
             }
 
             user = task.Result;
-            FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
+
+            await FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
+
             Debug.Log("회원가입 완료");
+
+            result = true;
         });
 
-        if (user != null)
-            result = true;
-        else
-            result = false;
+        await Task.Delay(1500);
+
+        return result;
     }
 
-    // 해당 작업이 완전히 끝난 후 이 함수를 호출한 곳에서 다음 줄을 실행하기 위해 비동기로 작업이 끝날 때 까지 기다리도록 함
-    public async Task<bool> SignUp(string email, string pw, UserInfo userInfo)
+    public async Task<bool> SignIn(string email, string pw)
     {
-        try
-        {
-            var createResult = await FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
+        bool result = false;
 
-            switch(createResult)
-            {
-                case 0:
-                    return false;
-                case 1:
-                    Debug.Log("이메일");
-                    return false;
-                case 2:
-                    Debug.Log("닉네임");
-                    return false;
-                case 3:
-                    var result = await _auth.CreateUserWithEmailAndPasswordAsync(email, pw);
-                    return true;
-            }
-
-            return false;
-        }
-        catch(FirestoreException e)
-        {
-            Debug.Log($"회원가입 실패 : {e.Message}");
-            return false;
-        }
-    }
-
-    public void SignIn(string email, string pw, ref bool result)
-    {
-        _auth.SignInWithEmailAndPasswordAsync(email, pw).ContinueWith(task =>
+        await _auth.SignInWithEmailAndPasswordAsync(email, pw).ContinueWith(task =>
         {
             if (task.IsCanceled)
             {
@@ -108,36 +100,15 @@ public class FirebaseAuthManager
             }
 
             _user = task.Result;
-            Debug.Log("로그인 완료");
+
+            Debug.Log("로그인 성공");
+
+            result = true;
         });
 
-        if (_user != null)
-            result = true;
-        else
-            result = false;
-    }
+        await Task.Delay(1500);
 
-    public async Task<bool> SignIn(string email, string pw)
-    {
-        try
-        {
-            var result = await _auth.SignInWithEmailAndPasswordAsync(email, pw);
-            _user = result;
-            var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfoByEmail(_user.Email);
-            if (userInfo != null)
-                PhotonNetwork.LocalPlayer.NickName = userInfo.Name;
-            else
-            {
-                Debug.Log("유저 로드 실패");
-                return false;
-            }
-            return true;
-        }
-        catch(FirebaseException e)
-        {
-            Debug.Log($"로그인 실패 : {e.Message}");
-            return false;
-        }
+        return result;
     }
 
     public void SignOut()

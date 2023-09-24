@@ -90,7 +90,13 @@ public class AbilitySelectUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         _button.interactable = false;
 
+        StopAllCoroutines();
         StartCoroutine(CorFadeIn());
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 
     public void Init()

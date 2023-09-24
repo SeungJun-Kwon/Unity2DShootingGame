@@ -7,12 +7,12 @@ using Photon.Pun;
 
 public class GameFinishUIController : MonoBehaviour
 {
-    [SerializeField] Image _winnerImage;
-    [SerializeField] TMP_Text _winnerName;
-    [SerializeField] TMP_Text _winnerScore;
-    [SerializeField] Image _loserImage;
-    [SerializeField] TMP_Text _loserName;
-    [SerializeField] TMP_Text _loserScore;
+    [SerializeField] Image _user1Image;
+    [SerializeField] TMP_Text _user1Name;
+    [SerializeField] TMP_Text _user1Score;
+    [SerializeField] Image _user2Image;
+    [SerializeField] TMP_Text _user2Name;
+    [SerializeField] TMP_Text _user2Score;
 
     CanvasGroup _gameFinishUICanvasGroup;
 
@@ -27,32 +27,45 @@ public class GameFinishUIController : MonoBehaviour
         _gameFinishUICanvasGroup.alpha = 0f;
     }
 
-    public async void EnableGameFinishUI(string winnerName, string loserName)
+    public async void EnableGameFinishUI(string user1, string user2, bool isDraw)
     {
-        UserInfo winner, loser;
+        UserInfo userInfo1, userInfo2;
 
         GameUIController.Instance._playerUI.gameObject.SetActive(false);
         AbilitySelectManager.Instance.gameObject.SetActive(false);
         GameUIController.Instance._timerImage.gameObject.SetActive(false);
 
-        winner = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(winnerName);
-        loser = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(loserName);
+        userInfo1 = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(user1);
+        userInfo2 = await FirebaseFirestoreManager.Instance.LoadUserInfoByNickname(user2);
 
-        winner.Win += 1;
-        loser.Lose += 1;
+        if (!isDraw)
+        {
+            userInfo1.Win += 1;
+            userInfo2.Lose += 1;
+        }
 
         StartCoroutine(FadeInGameFinishUICor());
 
-        _winnerName.text = winner.Name;
-        _winnerScore.text = $"W : {winner.Win} / L : {winner.Lose}";
+        if (userInfo1 != null)
+        {
+            _user1Image.sprite = ProfileSpriteManager.Instance.GetSprite(userInfo1.Profile);
+            _user1Name.text = userInfo1.Name;
+            _user1Score.text = $"W : {userInfo1.Win} / L : {userInfo1.Lose}";
+        }
 
-        _loserName.text = loser.Name;
-        _loserScore.text = $"W : {loser.Win} / L : {loser.Lose}";
+        if (userInfo2 != null)
+        {
+            _user2Image.sprite = ProfileSpriteManager.Instance.GetSprite(userInfo2.Profile);
+            _user2Name.text = userInfo2.Name;
+            _user2Score.text = $"W : {userInfo2.Win} / L : {userInfo2.Lose}";
+        }
 
-        if(winner.Name == PhotonNetwork.LocalPlayer.NickName)
-            FirebaseFirestoreManager.Instance.UpdateUserInfo(FirebaseAuthManager.Instance._user, winner);
+        if(userInfo1.Name == PhotonNetwork.LocalPlayer.NickName)
+            FirebaseFirestoreManager.Instance.UpdateUserInfo(FirebaseAuthManager.Instance._user, userInfo1);
         else
-            FirebaseFirestoreManager.Instance.UpdateUserInfo(FirebaseAuthManager.Instance._user, loser);
+            FirebaseFirestoreManager.Instance.UpdateUserInfo(FirebaseAuthManager.Instance._user, userInfo2);
+
+        Invoke(nameof(OutRoom), 5f);
     }
 
     IEnumerator FadeInGameFinishUICor()
@@ -70,4 +83,6 @@ public class GameFinishUIController : MonoBehaviour
 
         _gameFinishUICanvasGroup.alpha = 1f;
     }
+
+    public void OutRoom() => PhotonNetwork.LeaveRoom();
 }

@@ -395,14 +395,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _weaponName: 
   _curStat:
+    _hp: 0
     _damage: 0
+    _moveSpeed: 0
     _attackSpeed: 0
     _multiShot: 0
-    _doubleJump: 0
-  _hp: 0
-  _damage: 0
-  _moveSpeed: 0
-  _attackSpeed: 0
+    _multiJump: 0
   _jumpLeft: 0
 --- !u!114 &601941055371662812
 MonoBehaviour:

@@ -38,7 +38,7 @@ public class UserInfo
     public UserInfo(string name) : this()
     {
         Name = name;
-        Profile = "Default.png";
+        Profile = "E1";
     }
 
     public override string ToString()

@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AbilitySelectManager : MonoBehaviour
+public class AbilitySelectManager : MonoBehaviourPun
 {
     public static AbilitySelectManager Instance;
 
@@ -45,10 +45,6 @@ public class AbilitySelectManager : MonoBehaviour
             foreach (var ui in _abilityUIList)
                 ui.e_onClick.AddListener(FadeOutSelectUI);
 
-            // 타임 오버시 랜덤선택
-            GameManager.Instance.e_TimerOver.RemoveAllListeners();
-            GameManager.Instance.e_TimerOver.AddListener(SelectRandom);
-
             if (GameUIController.Instance != null)
                 GameUIController.Instance._playerUI.SetActive(false);
         }
@@ -58,8 +54,6 @@ public class AbilitySelectManager : MonoBehaviour
     {
         if (GameManager.Instance != null && GameManager.Instance.GameRound > 0)
         {
-            GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.StopTimer), RpcTarget.MasterClient);
-
             if (GameUIController.Instance != null)
                 GameUIController.Instance._playerUI.SetActive(true);
         }
@@ -129,6 +123,7 @@ public class AbilitySelectManager : MonoBehaviour
         {
             if (!PhotonNetwork.InRoom || count > 1000000f)
             {
+                Debug.Log($"{PhotonNetwork.InRoom} {count}");
                 GameManager.Instance.photonView.RPC(nameof(GameManager.Instance.GameFinish), RpcTarget.All);
                 return;
             }
