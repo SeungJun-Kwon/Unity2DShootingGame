@@ -53,6 +53,19 @@ Firebase Firestore도 연동하기에 계정 정보, 닉네임 정보 등 중복
 
 <img src="https://github.com/SeungJun-Kwon/Unity2DShootingGame/assets/80217301/706490ba-5549-4c8b-9e5a-895caba380c2" width="640" height="360">
 
+## 방 생성, 입장
+로비에서 룸을 선택해 입장을 누르면 표시되는 화면
+
+포톤 네트워크를 통해 룸 목록을 로비에서 확인할 수 있고 입장하면 룸에 있는 유저와 통신할 수 있음
+
+상대방 프로필을 누르면 간단한 정보를 볼 수 있고 채팅 또한 가능함
+
+룸 안에서도 프로필을 변경할 수 있으며 상대방 또한 나의 프로필을 언제든 확인할 수 있음
+
+**[구동 화면]**
+
+<img src="https://github.com/SeungJun-Kwon/Unity2DShootingGame/assets/80217301/396c4260-3d7f-4d11-8ed2-217f79edb0be" width="640" height="360">
+
 ## 상태 패턴
 IState라는 인터페이스를 만들어 각 상태 트리거를 구현하고 동작할 수 있도록 한 패턴
 
@@ -80,3 +93,7 @@ IDLE이나 MOVE 상태처럼 상시적으로 동작을 행해야 하는 상태�
 **[구동 화면]**
 
 <img src="https://github.com/SeungJun-Kwon/Unity2DShootingGame/assets/80217301/7c2a99e1-da29-4bcc-b9ff-b5d21d4971d3" width="640" height="360">
+
+## 무기, 업그레이드 선택
+게임 진행 중 무기, 업그레이드 선택지가 주어짐
+
